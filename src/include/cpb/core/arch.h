@@ -22,6 +22,10 @@
 #include <stdio.h>
 #include <string.h>
 
+#ifdef HAVE_APR
+  #include <apr.h>
+#endif
+
 #ifndef NULL
 #define NULL ((void *) 0)
 #endif
@@ -51,14 +55,25 @@
 #define S64_MAX 9223372036854775807LL
 
 typedef unsigned char u8_t;
-typedef unsigned short int u16_t;
-typedef unsigned int u32_t;
-typedef unsigned long long int u64_t;
+typedef signed char   s8_t;
 
-typedef signed char s8_t;
-typedef short int s16_t;
-typedef int s32_t;
-typedef long long int s64_t;
+#ifndef HAVE_APR
+  typedef unsigned short int     u16_t;
+  typedef unsigned int           u32_t;
+  typedef unsigned long long int u64_t;
+
+  typedef short int     s16_t;
+  typedef int           s32_t;
+  typedef long long int s64_t;
+#else
+  typedef apr_uint16_t u16_t;
+  typedef apr_uint32_t u32_t;
+  typedef apr_uint64_t u64_t;
+
+  typedef apr_int32_t s16_t;
+  typedef apr_int32_t s32_t;
+  typedef apr_int64_t s64_t;
+#endif
 
 
 #endif /* __CPB_CORE_ARCH_H__ */
