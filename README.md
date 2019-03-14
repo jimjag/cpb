@@ -1,7 +1,7 @@
 cpb
 ====
 
-The "Simple C Protocol Buffer (cpb)" provides fast encoding and decoding of Google Protocol Buffers in C and was based on the 'lwcp' C library released by Simon Kallweit. More documentation on the C API can be found here: [ http://code.google.com/p/lwpb/ ](http://code.google.com/p/lwpb/).
+The "Simple C Protocol Buffer (cpb)" provides fast encoding and decoding of Google Protocol Buffers in C and was based on the 'lwcp' C library released by Simon Kallweit.
 
 Some distinctive things about cpb:
 
