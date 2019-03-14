@@ -44,7 +44,11 @@ message TestMessage { required int32 count = 1; required Info info = 2; }
 The following example will encode a simple message of the type 'TestMessage':
 
 ```
-void encode_example(void) { struct cpb_encoder encoder; unsigned char buf[128]; size_t len;
+void encode_example(void) {
+
+struct cpb_encoder encoder;
+unsigned char buf[128];
+size_t len;
 
 // Initialize the encoder
 cpb_encoder_init(&encoder);
@@ -99,7 +103,12 @@ if (msg_desc == test_TestMessage) {
 }
 }
 
-void decode_example(void) { struct cpb_decoder decoder; unsigned char buf[128]; size_t len; struct TestMessage msg;
+void decode_example(void) {
+
+struct cpb_decoder decoder;
+unsigned char buf[128];
+size_t len;
+struct TestMessage msg;
 
 // Initialize the decoder
 cpb_decoder_init(&decoder);
