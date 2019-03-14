@@ -1,0 +1,12 @@
+.checkstyle
+.ruleset
+.pmd
+.classpath
+.project
+.settings/
+.idea/
+.DS_Store
+.cache
+*.iml
+*.o
+*.a

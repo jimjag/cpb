@@ -1,0 +1,5 @@
+cpb - Simple C protocol buffers (cpb)
+
+A simple implementation of the Google Protocol Buffers for Ansi C, with a
+simple streaming interface for encoding and decoding.
+
