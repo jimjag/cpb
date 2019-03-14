@@ -1,13 +1,13 @@
 /** @file decoder.c
- * 
+ *
  * Implementation of the protocol buffers decoder.
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *     http://www.apache.org/licenses/LICENSE-2.0
- *     
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -27,7 +27,7 @@ static int debug_indent;
 static void debug_print_indent(void)
 {
     int i;
-    
+
     for (i = 0; i < debug_indent; i++)
         printf("  ");
 }
@@ -43,7 +43,7 @@ static void debug_msg_start_handler(struct cpb_decoder *decoder,
 #else
     name = "<message>";
 #endif
-    
+
     debug_print_indent();
     printf("%s:\n", name);
     debug_indent++;
@@ -80,18 +80,18 @@ static void debug_field_handler(struct cpb_decoder *decoder,
         "(bytes)",
         "(message)",
     };
-    
+
     const char *name;
-    
+
 #if CPB_FIELD_NAMES
     name = field_desc->name;
 #else
     name = "<field>";
 #endif
-    
+
     debug_print_indent();
     printf("%-20s %-10s = ", name, typ_names[field_desc->opts.typ]);
-    
+
     switch (field_desc->opts.typ) {
     case CPB_DOUBLE:
         printf("%f", value->double_);
@@ -134,7 +134,7 @@ static void debug_field_handler(struct cpb_decoder *decoder,
     default:
         break;
     }
-    
+
     printf("\n");
 }
 
@@ -147,12 +147,12 @@ static void debug_field_handler(struct cpb_decoder *decoder,
  * @param buf Memory buffer
  * @param varint Buffer to decode into
  * @return Returns CPB_ERR_OK if successful or CPB_ERR_END_OF_BUF if there
- * were not enough bytes in the memory buffer. 
+ * were not enough bytes in the memory buffer.
  */
 cpb_err_t cpb_decode_varint(struct cpb_buf *buf, u64_t *varint)
 {
     int bitpos;
-    
+
     *varint = 0;
     for (bitpos = 0; *buf->pos & 0x80 && bitpos < 64; bitpos += 7, buf->pos++) {
         *varint |= (u64_t) (*buf->pos & 0x7f) << bitpos;
@@ -161,7 +161,7 @@ cpb_err_t cpb_decode_varint(struct cpb_buf *buf, u64_t *varint)
     }
     *varint |= (u64_t) (*buf->pos & 0x7f) << bitpos;
     buf->pos++;
-    
+
     return CPB_ERR_OK;
 }
 
@@ -170,7 +170,7 @@ cpb_err_t cpb_decode_varint(struct cpb_buf *buf, u64_t *varint)
  * @param buf Memory buffer
  * @param value Buffer to decode into
  * @return Returns CPB_ERR_OK if successful or CPB_ERR_END_OF_BUF if there
- * were not enough bytes in the memory buffer. 
+ * were not enough bytes in the memory buffer.
  */
 cpb_err_t cpb_decode_32bit(struct cpb_buf *buf, u32_t *value)
 {
@@ -180,7 +180,7 @@ cpb_err_t cpb_decode_32bit(struct cpb_buf *buf, u32_t *value)
     *value = buf->pos[0] | (buf->pos[1] << 8) |
              (buf->pos[2] << 16) | (buf->pos[3] << 24);
     buf->pos += 4;
-    
+
     return CPB_ERR_OK;
 }
 
@@ -189,20 +189,20 @@ cpb_err_t cpb_decode_32bit(struct cpb_buf *buf, u32_t *value)
  * @param buf Memory buffer
  * @param value Buffer to decode into
  * @return Returns CPB_ERR_OK if successful or CPB_ERR_END_OF_BUF if there
- * were not enough bytes in the memory buffer. 
+ * were not enough bytes in the memory buffer.
  */
 cpb_err_t cpb_decode_64bit(struct cpb_buf *buf, u64_t *value)
 {
     int i;
-    
+
     if (cpb_buf_left(buf) < 8)
         return CPB_ERR_END_OF_BUF;
-    
+
     *value = 0;
     for (i = 7; i >= 0; i--)
         *value = (*value << 8) | buf->pos[i];
     buf->pos += 8;
-    
+
     return CPB_ERR_OK;
 }
 
@@ -304,7 +304,7 @@ void cpb_decoder_field_handler(struct cpb_decoder *decoder,
 /**
  * Setups the decoder to use the verbose debug handlers which output the
  * message contents to the console.
- * @param decoder Decoder 
+ * @param decoder Decoder
  */
 void cpb_decoder_use_debug_handlers(struct cpb_decoder *decoder)
 {
@@ -335,20 +335,20 @@ cpb_err_t cpb_decoder_decode(struct cpb_decoder *decoder,
     union wire_value wire_value;
     union cpb_value value;
     struct cpb_decoder_stack_frame *frame, *new_frame;
-    
+
     /* Setup initial stack frame */
     decoder->depth = 1;
     decoder->packed = 0;
     frame = &decoder->stack[decoder->depth - 1];
     cpb_buf_init(&frame->buf, data, len);
     frame->msg_desc = msg_desc;
-    
+
     while (decoder->depth >= 1) {
 decode_nested:
-        
+
         /* Get current frame */
         frame = &decoder->stack[decoder->depth - 1];
-        
+
         /* Notify start message */
         if (frame->msg_desc && cpb_buf_used(&frame->buf) == 0)
             if (decoder->msg_start_handler)
@@ -356,7 +356,7 @@ decode_nested:
 
         /* Process buffer */
         while (cpb_buf_left(&frame->buf) > 0) {
-            
+
             if (decoder->packed) {
                 wire_type = field_wire_type(field_desc);
             } else {
@@ -364,10 +364,10 @@ decode_nested:
                 ret = cpb_decode_varint(&frame->buf, &key);
                 if (ret != CPB_ERR_OK)
                     return ret;
-            
+
                 number = key >> 3;
                 wire_type = key & 0x07;
-            
+
                 /* Find the field descriptor */
                 for (i = 0; i < frame->msg_desc->num_fields; i++)
                     if (frame->msg_desc->fields[i].number == number) {
@@ -375,7 +375,7 @@ decode_nested:
                         break;
                     }
             }
-            
+
             /* Decode field's wire value */
             switch(wire_type) {
             case WT_VARINT:
@@ -406,26 +406,26 @@ decode_nested:
                 CPB_ASSERT(1, "Unknown wire type");
                 break;
             }
-            
+
             /* Skip unknown fields */
             if (!field_desc)
                 continue;
-            
+
             /* Handle packed repeated fields */
             if ((wire_type == WT_STRING) &&
                 CPB_IS_PACKED_REPEATED(field_desc)) {
-                
+
                 /* Create new stack frame */
                 new_frame = push_stack_frame(decoder);
                 cpb_buf_init(&new_frame->buf, wire_value.string.data, wire_value.string.len);
                 new_frame->msg_desc = frame->msg_desc;
-                
+
                 /* Enter packed repeated mode */
                 decoder->packed = 1;
-                
+
                 goto decode_nested;
             }
-            
+
             switch (field_desc->opts.typ) {
             case CPB_DOUBLE:
                 memcpy(&value.double_, &wire_value.int64, sizeof(double));
@@ -483,33 +483,33 @@ decode_nested:
             default:
                 if (decoder->field_handler)
                     decoder->field_handler(decoder, msg_desc, field_desc, NULL, decoder->arg);
-                
+
                 /* Create new stack frame */
                 new_frame = push_stack_frame(decoder);
                 cpb_buf_init(&new_frame->buf, wire_value.string.data, wire_value.string.len);
                 new_frame->msg_desc = field_desc->msg_desc;
-                
+
                 goto decode_nested;
             }
-            
+
             if (decoder->field_handler)
                 decoder->field_handler(decoder, frame->msg_desc, field_desc, &value, decoder->arg);
         }
-        
+
         /* Notify end message */
         if (frame->msg_desc)
             if (decoder->msg_end_handler)
                 decoder->msg_end_handler(decoder, frame->msg_desc, decoder->arg);
-        
+
         /* Pop the stack */
         decoder->depth--;
-        
+
         /* Leave packed repeated mode */
         decoder->packed = 0;
     }
-    
+
     if (used)
         *used = cpb_buf_used(&decoder->stack[0].buf);
-    
+
     return CPB_ERR_OK;
 }

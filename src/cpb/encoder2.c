@@ -1,13 +1,13 @@
 /** @file encoder.c
- * 
+ *
  * Implementation of the protocol buffers encoder.
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *     http://www.apache.org/licenses/LICENSE-2.0
- *     
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -30,7 +30,7 @@
  * @param buf Memory buffer
  * @param varint Value to encode
  * @return Returns CPB_ERR_OK if successful or CPB_ERR_END_OF_BUF if there
- * was not enough space left in the memory buffer. 
+ * was not enough space left in the memory buffer.
  */
 size_t cpb_encode_varint(u8_t *buf, u64_t varint)
 {
@@ -47,7 +47,7 @@ size_t cpb_encode_varint(u8_t *buf, u64_t varint)
         varint >>= 7;
         len++;
     } while (varint);
-    
+
     return len;
 }
 
@@ -56,7 +56,7 @@ size_t cpb_encode_varint(u8_t *buf, u64_t varint)
  * @param buf Memory buffer
  * @param value Value to encode
  * @return Returns CPB_ERR_OK if successful or CPB_ERR_END_OF_BUF if there
- * was not enough space left in the memory buffer. 
+ * was not enough space left in the memory buffer.
  */
 size_t cpb_encode_32bit(u8_t *buf, u32_t value)
 {
@@ -68,7 +68,7 @@ size_t cpb_encode_32bit(u8_t *buf, u32_t value)
         *buf++ = (value >> 16) & 0xff;
         *buf++ = (value >> 24) & 0xff;
     }
-    
+
     return len;
 }
 
@@ -77,13 +77,13 @@ size_t cpb_encode_32bit(u8_t *buf, u32_t value)
  * @param buf Memory buffer
  * @param value Value to encode
  * @return Returns CPB_ERR_OK if successful or CPB_ERR_END_OF_BUF if there
- * was not enough space left in the memory buffer. 
+ * was not enough space left in the memory buffer.
  */
 size_t cpb_encode_64bit(u8_t *buf, u64_t value)
 {
     size_t len = 8;
 
-    if (buf) {   
+    if (buf) {
         *buf++ = (value) & 0xff;
         *buf++ = (value >> 8) & 0xff;
         *buf++ = (value >> 16) & 0xff;
@@ -246,7 +246,7 @@ size_t cpb_encoder2_add_field(struct cpb_encoder2 *encoder,
         wire_value.string.len = value->message.len;
         break;
     }
-   
+
     /* Don't output wire key in packed mode */
     if (!encoder->packed) {
         /* Override wire value if this is a packed repeated field */
@@ -255,7 +255,7 @@ size_t cpb_encoder2_add_field(struct cpb_encoder2 *encoder,
             wire_value.string.data = value->message.data;
             wire_value.string.len = value->message.len;
         }
-        
+
         key = wire_type | (field_desc->number << 3);
         size = cpb_encode_varint(buf, key);
         len += size;
@@ -302,7 +302,7 @@ size_t cpb_encoder2_add_field(struct cpb_encoder2 *encoder,
         CPB_ASSERT(1, "Unknown wire type");
         break;
     }
-    
+
     return len;
 }
 

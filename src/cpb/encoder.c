@@ -1,13 +1,13 @@
 /** @file encoder.c
- * 
+ *
  * Implementation of the protocol buffers encoder.
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *     http://www.apache.org/licenses/LICENSE-2.0
- *     
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -31,7 +31,7 @@
  * @param buf Memory buffer
  * @param varint Value to encode
  * @return Returns CPB_ERR_OK if successful or CPB_ERR_END_OF_BUF if there
- * was not enough space left in the memory buffer. 
+ * was not enough space left in the memory buffer.
  */
 static cpb_err_t encode_varint(struct cpb_buf *buf, u64_t varint)
 {
@@ -46,7 +46,7 @@ static cpb_err_t encode_varint(struct cpb_buf *buf, u64_t varint)
         varint >>= 7;
         buf->pos++;
     } while (varint);
-    
+
     return CPB_ERR_OK;
 }
 
@@ -55,19 +55,19 @@ static cpb_err_t encode_varint(struct cpb_buf *buf, u64_t varint)
  * @param buf Memory buffer
  * @param value Value to encode
  * @return Returns CPB_ERR_OK if successful or CPB_ERR_END_OF_BUF if there
- * was not enough space left in the memory buffer. 
+ * was not enough space left in the memory buffer.
  */
 static cpb_err_t encode_32bit(struct cpb_buf *buf, u32_t value)
 {
     if (cpb_buf_left(buf) < 4)
         return CPB_ERR_END_OF_BUF;
-    
+
     buf->pos[0] = (value) & 0xff;
     buf->pos[1] = (value >> 8) & 0xff;
     buf->pos[2] = (value >> 16) & 0xff;
     buf->pos[3] = (value >> 24) & 0xff;
     buf->pos += 4;
-    
+
     return CPB_ERR_OK;
 }
 
@@ -76,13 +76,13 @@ static cpb_err_t encode_32bit(struct cpb_buf *buf, u32_t value)
  * @param buf Memory buffer
  * @param value Value to encode
  * @return Returns CPB_ERR_OK if successful or CPB_ERR_END_OF_BUF if there
- * was not enough space left in the memory buffer. 
+ * was not enough space left in the memory buffer.
  */
 static cpb_err_t encode_64bit(struct cpb_buf *buf, u64_t value)
 {
     if (cpb_buf_left(buf) < 8)
         return CPB_ERR_END_OF_BUF;
-    
+
     buf->pos[0] = (value) & 0xff;
     buf->pos[1] = (value >> 8) & 0xff;
     buf->pos[2] = (value >> 16) & 0xff;
@@ -93,7 +93,7 @@ static cpb_err_t encode_64bit(struct cpb_buf *buf, u64_t value)
     buf->pos[6] = (value >> 16) & 0xff;
     buf->pos[7] = (value >> 24) & 0xff;
     buf->pos += 8;
-    
+
     return CPB_ERR_OK;
 }
 
@@ -144,10 +144,10 @@ void cpb_encoder_start(struct cpb_encoder *encoder,
                         void *data, size_t len)
 {
     struct cpb_encoder_stack_frame *frame = &encoder->stack[0];
-    
+
     encoder->depth = 1;
     encoder->packed = 0;
-    
+
     cpb_buf_init(&frame->buf, data, len);
     frame->field_desc = NULL;
     frame->msg_desc = msg_desc;
@@ -173,7 +173,7 @@ cpb_err_t cpb_encoder_nested_start(struct cpb_encoder *encoder,
                                      const struct cpb_field_desc *field_desc)
 {
     struct cpb_encoder_stack_frame *frame, *new_frame;
-    
+
     CPB_ASSERT(field_desc->opts.typ == CPB_MESSAGE, "Field is not a message");
 
     /* Get parent frame */
@@ -183,7 +183,7 @@ cpb_err_t cpb_encoder_nested_start(struct cpb_encoder *encoder,
     new_frame = push_stack_frame(encoder);
     new_frame->field_desc = field_desc;
     new_frame->msg_desc = field_desc->msg_desc;
-    
+
     /*
      * Reserve a few bytes for the field on the parent frame. This is where
      * the field key (message) and the message length will be stored, once it
@@ -193,7 +193,7 @@ cpb_err_t cpb_encoder_nested_start(struct cpb_encoder *encoder,
         return CPB_ERR_END_OF_BUF;
     cpb_buf_init(&new_frame->buf, frame->buf.pos + MSG_RESERVE_BYTES,
                   cpb_buf_left(&frame->buf) - MSG_RESERVE_BYTES);
-    
+
     return CPB_ERR_OK;
 }
 
@@ -206,7 +206,7 @@ cpb_err_t cpb_encoder_nested_end(struct cpb_encoder *encoder)
 {
     struct cpb_encoder_stack_frame *frame;
     union cpb_value value;
-    
+
     /* Get current frame */
     frame = &encoder->stack[encoder->depth - 1];
 
@@ -231,9 +231,9 @@ cpb_err_t cpb_encoder_packed_repeated_start(struct cpb_encoder *encoder,
 
     CPB_ASSERT(CPB_IS_PACKED_REPEATED(field_desc),
                 "Field is not repeated packed");
-    
+
     CPB_ASSERT(!encoder->packed, "Packed repeated fields must not be nested");
-    
+
     /* Get parent frame */
     frame = &encoder->stack[encoder->depth - 1];
 
@@ -241,7 +241,7 @@ cpb_err_t cpb_encoder_packed_repeated_start(struct cpb_encoder *encoder,
     new_frame = push_stack_frame(encoder);
     new_frame->field_desc = field_desc;
     new_frame->msg_desc = NULL;
-    
+
     /*
      * Reserve a few bytes for the field on the parent frame. This is where
      * the field key (type) and the message length will be stored, once it
@@ -251,10 +251,10 @@ cpb_err_t cpb_encoder_packed_repeated_start(struct cpb_encoder *encoder,
         return CPB_ERR_END_OF_BUF;
     cpb_buf_init(&new_frame->buf, frame->buf.pos + MSG_RESERVE_BYTES,
                   cpb_buf_left(&frame->buf) - MSG_RESERVE_BYTES);
-    
+
     /* Enter packed repeated mode */
     encoder->packed = 1;
-    
+
     return CPB_ERR_OK;
 }
 
@@ -267,7 +267,7 @@ cpb_err_t cpb_encoder_packed_repeated_end(struct cpb_encoder *encoder)
 {
     struct cpb_encoder_stack_frame *frame;
     union cpb_value value;
-    
+
     CPB_ASSERT(encoder->packed, "Not in packed repeated mode");
 
     /* Get current frame */
@@ -275,10 +275,10 @@ cpb_err_t cpb_encoder_packed_repeated_end(struct cpb_encoder *encoder)
 
     /* Pop the stack */
     pop_stack_frame(encoder);
-    
+
     /* Leave packed repeated mode */
     encoder->packed = 0;
-    
+
     value.message.data = frame->buf.base;
     value.message.len = cpb_buf_used(&frame->buf);
     return cpb_encoder_add_field(encoder, frame->field_desc, &value);
@@ -303,12 +303,12 @@ cpb_err_t cpb_encoder_add_field(struct cpb_encoder *encoder,
     u64_t key;
     enum wire_type wire_type = 0;
     union wire_value wire_value;
-    
+
     CPB_ASSERT(encoder->depth > 0, "Fields can only be added inside a message");
-    
+
     /* Get current frame */
     frame = &encoder->stack[encoder->depth - 1];
-    
+
     if (encoder->packed) {
         /* Check that packed repeated field is not interleaved with other fields */
         CPB_ASSERT(field_desc == frame->field_desc,
@@ -324,7 +324,7 @@ cpb_err_t cpb_encoder_add_field(struct cpb_encoder *encoder,
         if (i == frame->msg_desc->num_fields)
             return CPB_ERR_UNKNOWN_FIELD;
     }
-    
+
     /* Encode wire value */
     switch (field_desc->opts.typ) {
     case CPB_DOUBLE:
@@ -401,7 +401,7 @@ cpb_err_t cpb_encoder_add_field(struct cpb_encoder *encoder,
         wire_value.string.len = value->message.len;
         break;
     }
-    
+
     /* Do not encode field key for packed repeated fields */
     if (!encoder->packed) {
         /* Override wire value if this is a packed repeated field */
@@ -410,13 +410,13 @@ cpb_err_t cpb_encoder_add_field(struct cpb_encoder *encoder,
             wire_value.string.data = value->message.data;
             wire_value.string.len = value->message.len;
         }
-        
+
         key = wire_type | (field_desc->number << 3);
         ret = encode_varint(&frame->buf, key);
         if (ret != CPB_ERR_OK)
             return ret;
     }
-    
+
     switch (wire_type) {
     case WT_VARINT:
         ret = encode_varint(&frame->buf, wire_value.varint);
@@ -455,7 +455,7 @@ cpb_err_t cpb_encoder_add_field(struct cpb_encoder *encoder,
         CPB_ASSERT(1, "Unknown wire type");
         break;
     }
-    
+
     return CPB_ERR_OK;
 }
 

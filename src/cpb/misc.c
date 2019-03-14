@@ -1,13 +1,13 @@
 /** @file misc.c
- * 
+ *
  * Misc functions.
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *     http://www.apache.org/licenses/LICENSE-2.0
- *     
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -24,7 +24,7 @@ static const struct cpb_struct_map_field *find_map_field(
         const struct cpb_field_desc *field_desc)
 {
     const struct cpb_struct_map_field *field;
-    
+
     for (field = map->fields; field->field_desc; field++)
         if (field->field_desc == field_desc)
             return field;
@@ -40,14 +40,14 @@ static void unpack_field(struct cpb_struct_decoder *sdecoder,
 {
     size_t len;
     struct cpb_struct_decoder_stack_frame *frame;
-    
+
     frame = &sdecoder->stack[sdecoder->depth];
-    
+
     /* Reset field index if a new field is encountered */
     if (field != frame->last_field)
         frame->field_index = 0;
     frame->last_field = field;
-    
+
     if (field->count >= field->count)
 
     switch (field->field_desc->opts.typ) {
@@ -112,7 +112,7 @@ static void unpack_field(struct cpb_struct_decoder *sdecoder,
         printf("submessage\n");
         break;
     }
-    
+
 }
 
 static void sdecoder_msg_start_handler(struct cpb_decoder *decoder,
@@ -126,7 +126,7 @@ static void sdecoder_msg_start_handler(struct cpb_decoder *decoder,
 
     sdecoder->depth++;
     frame = &sdecoder->stack[sdecoder->depth];
-    
+
     if (sdecoder->depth > 0) {
         last_frame = &sdecoder->stack[sdecoder->depth - 1];
         frame->map = (const struct cpb_struct_map *) last_frame->last_field->len;
@@ -136,9 +136,9 @@ static void sdecoder_msg_start_handler(struct cpb_decoder *decoder,
         frame->field_index = 0;
         last_frame->field_index++;
     }
-    
+
     CPB_ASSERT(frame->map->msg_desc == msg_desc, "Message type mismatch");
-    
+
     if (sdecoder->msg_start_handler)
         sdecoder->msg_start_handler(sdecoder, msg_desc, sdecoder->arg);
 }
@@ -149,9 +149,9 @@ static void sdecoder_msg_end_handler(struct cpb_decoder *decoder,
 {
     struct cpb_struct_decoder *sdecoder = arg;
     struct cpb_struct_decoder_stack_frame *frame;
-    
+
     printf("msg end\n");
-    
+
     sdecoder->depth--;
     frame = &sdecoder->stack[sdecoder->depth];
 
@@ -167,7 +167,7 @@ static void sdecoder_field_handler(struct cpb_decoder *decoder,
     struct cpb_struct_decoder *sdecoder = arg;
     struct cpb_struct_decoder_stack_frame *frame = &sdecoder->stack[sdecoder->depth];
     const struct cpb_struct_map_field *field;
-    
+
     field = find_map_field(frame->map, field_desc);
     if (field)
         unpack_field(sdecoder, field, value);
@@ -189,11 +189,11 @@ void cpb_struct_decoder_init(struct cpb_struct_decoder *sdecoder)
     /* Initialize decoder */
     cpb_decoder_init(&sdecoder->decoder);
     cpb_decoder_arg(&sdecoder->decoder, sdecoder);
-    cpb_decoder_msg_handler(&sdecoder->decoder, 
+    cpb_decoder_msg_handler(&sdecoder->decoder,
             sdecoder_msg_start_handler, sdecoder_msg_end_handler);
     cpb_decoder_field_handler(&sdecoder->decoder,
             sdecoder_field_handler);
-    
+
     /* Initialize internals */
     sdecoder->arg = NULL;
     sdecoder->msg_start_handler = NULL;
@@ -256,7 +256,7 @@ cpb_err_t cpb_struct_decoder_decode(struct cpb_struct_decoder *sdecoder,
     sdecoder->stack[0].base = struct_base;
     sdecoder->stack[0].last_field = NULL;
     sdecoder->stack[0].field_index = 0;
-    
+
     return cpb_decoder_decode(&sdecoder->decoder, struct_map->msg_desc, data, len, used);
 }
 
