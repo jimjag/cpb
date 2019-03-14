@@ -159,7 +159,7 @@ From a [recent benchmark][fastpb-benchmark] which included the cpb module (lower
 Completeness
 ------------
 
-Supported types:
+Supported types (protobuf wire types 1, 2, and 5):
 
   * INT32
   * UINT32
@@ -186,6 +186,10 @@ Supported options:
 Not supported:
 
   * extensions
+  * `required` fields are not enforced†
+  * default values for optional fields in decoding†
+
+†: by design
 
 Maintainer
 ----------
