@@ -84,11 +84,6 @@ Supported options:
 
   * packed repeated fields
 
-Supported by the C library, but not by the Python library:
-
-  * services
-  * RPC
-
 Not supported:
 
   * extensions
