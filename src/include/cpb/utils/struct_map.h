@@ -1,13 +1,13 @@
 /** @file struct_map.h
- * 
+ *
  * Simple C protocol buffers (cpb) struct map interface.
- * 
+ *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
  * You may obtain a copy of the License at
- * 
+ *
  *     http://www.apache.org/licenses/LICENSE-2.0
- *     
+ *
  * Unless required by applicable law or agreed to in writing, software
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
@@ -53,14 +53,14 @@ const struct cpb_struct_map _name_ = {                                     \
 
 #define CPB_STRUCT_MAP_STRING(_field_desc_, _struct_, _field_, _len_, _count_) \
     CPB_STRUCT_MAP_FIELD(_field_desc_, _struct_, _field_, _len_, _count_)
-    
+
 #define CPB_STRUCT_MAP_BYTES(_field_desc_, _struct_, _field_, _len_, _count_) \
     CPB_STRUCT_MAP_FIELD(_field_desc_, _struct_, _field_, _len_, _count_)
 
 #define CPB_STRUCT_MAP_MESSAGE(_field_desc_, _struct_, _field_, _struct_map_, _count_) \
     CPB_STRUCT_MAP_FIELD(_field_desc_, _struct_, _field_, (size_t) (_struct_map_), _count_)
 
-    
+
 #define CPB_STRUCT_MAP_FIELD(_field_desc_, _struct_, _field_, _len_, _count_) \
         {                                                                   \
             .field_desc = _field_desc_,                                     \
