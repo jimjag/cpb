@@ -61,24 +61,27 @@ static void debug_field_handler(struct cpb_decoder *decoder,
                                 const struct cpb_field_desc *field_desc,
                                 union cpb_value *value, void *arg)
 {
+    /* To match Field Value types defined in types.h */
     static char *typ_names[] = {
+        "(invalid)",
         "(double)",
         "(float)",
-        "(int32)",
         "(int64)",
-        "(uint32)",
         "(uint64)",
-        "(sint32)",
-        "(sint64)",
-        "(fixed32)",
+        "(int32)",
         "(fixed64)",
+        "(fixed32)",
+        "(bool)",
+        "(string)",
+        "(group)",
+        "(message)",
+        "(bytes)",
+        "(uint32)",
+        "(enum)",
         "(sfixed32)",
         "(sfixed64)",
-        "(bool)",
-        "(enum)",
-        "(string)",
-        "(bytes)",
-        "(message)",
+        "(sint32)",
+        "(sint64)",
     };
 
     const char *name;
