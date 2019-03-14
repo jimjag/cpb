@@ -31,7 +31,7 @@ int main()
     cpb_encoder_init(&encoder);
     cpb_encoder_start(&encoder, test_Person, buf, sizeof(buf));
     cpb_encoder_add_string(&encoder, test_Person_name, "Jim Jagielski");
-    cpb_encoder_add_int32(&encoder, test_Person_id, 1237);
+    cpb_encoder_add_int32(&encoder, test_Person_id, -9991237);
     cpb_encoder_add_string(&encoder, test_Person_email, "jimjag@gmail.com");
     cpb_encoder_nested_start(&encoder, test_Person_phone);
     cpb_encoder_add_string(&encoder, test_PhoneNumber_number, "123456789");
@@ -47,7 +47,7 @@ int main()
     cpb_encoder_nested_end(&encoder);
     len = cpb_encoder_finish(&encoder);
 
-    printf("encoded message length = %d\n", len);
+    printf("encoded message length = %d\n", (int)len);
     
     cpb_decoder_init(&decoder);
     cpb_decoder_use_debug_handlers(&decoder);
